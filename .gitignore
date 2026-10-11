@@ -1,0 +1,31 @@
+# Datos (NUNCA subir datos reales)
+data/*
+!data/README.md
+*.csv
+*.xlsx
+*.xls
+*.parquet
+*.sqlite
+*.db
+*.dump
+*.bak
+
+# Credenciales
+.env
+*.pem
+*.key
+
+# Power BI (puede contener datos incrustados)
+*.pbix
+*.pbit
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Salidas con posibles datos
+reports/*
+!reports/.gitkeep
