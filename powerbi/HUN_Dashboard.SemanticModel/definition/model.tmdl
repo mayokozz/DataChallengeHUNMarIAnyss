@@ -1,0 +1,40 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	valueFilterBehavior: independent
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_ProTooling = ["TMDLView_Desktop","DevMode"]
+
+annotation PBI_QueryOrder = ["Demanda Horaria"]
+
+ref table Demanda
+ref table Escenario
+ref table Profesionales
+ref table 'Pacientes por profesional al día'
+ref table Utilizacion
+ref table Sensibilidad
+ref table 'Demanda Horaria'
+ref table 'Ajuste de demanda'
+ref table 'Pacientes por hora por profesional'
+ref table 'Profesionales mañana'
+ref table 'Profesionales tarde'
+ref table 'Profesionales noche'
+ref table 'Sensibilidad ritmo'
+ref table DateTableTemplate_b11986a5-3352-4b46-bc8e-2871d7bc14e5
+ref table LocalDateTable_b691df30-15a4-47e2-bcb9-16d5f1d46763
+ref table 'Doc Tipos de visita'
+ref table 'Doc Tablas OMOP'
+ref table 'Doc Metricas'
+ref table 'Doc Evaluacion semanal'
+ref table 'Doc Extremos'
+ref table 'Doc Turnos propuestos'
+ref table 'Utilizacion pct'
+
+ref cultureInfo en-US
+

@@ -1,0 +1,28 @@
+table 'Doc Turnos propuestos'
+	column 'Hora'
+		dataType: int64
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: [Hora]
+
+	column 'Visitas esperadas'
+		dataType: double
+		formatString: 0.0
+		summarizeBy: sum
+		sourceColumn: [Visitas esperadas]
+
+	column 'Capacidad turnos fijos'
+		dataType: double
+		formatString: 0.0
+		summarizeBy: sum
+		sourceColumn: [Capacidad turnos fijos]
+
+	column 'Capacidad turnos escalonados'
+		dataType: double
+		formatString: 0.0
+		summarizeBy: sum
+		sourceColumn: [Capacidad turnos escalonados]
+
+	partition 'Doc Turnos propuestos' = calculated
+		mode: import
+		source = DATATABLE("Hora", INTEGER, "Visitas esperadas", DOUBLE, "Capacidad turnos fijos", DOUBLE, "Capacidad turnos escalonados", DOUBLE, {{0, 9.1, 32.0, 9.6}, {1, 5.3, 32.0, 6.4}, {2, 4.3, 32.0, 9.6}, {3, 4.1, 32.0, 9.6}, {4, 4.0, 32.0, 9.6}, {5, 7.3, 32.0, 9.6}, {6, 21.0, 128.0, 38.4}, {7, 78.6, 128.0, 99.2}, {8, 142.9, 128.0, 172.8}, {9, 140.0, 128.0, 204.8}, {10, 138.6, 128.0, 211.2}, {11, 111.4, 128.0, 224.0}, {12, 57.7, 128.0, 224.0}, {13, 96.9, 128.0, 227.2}, {14, 120.3, 96.0, 198.4}, {15, 112.0, 96.0, 144.0}, {16, 72.3, 96.0, 73.6}, {17, 32.6, 96.0, 44.8}, {18, 26.4, 96.0, 35.2}, {19, 17.0, 96.0, 22.4}, {20, 17.0, 96.0, 22.4}, {21, 15.4, 96.0, 19.2}, {22, 14.9, 32.0, 19.2}, {23, 12.1, 32.0, 12.8}})

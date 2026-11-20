@@ -1,0 +1,15 @@
+table 'Doc Tipos de visita'
+	column 'Tipo de visita'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [Tipo de visita]
+
+	column 'Visitas'
+		dataType: int64
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: [Visitas]
+
+	partition 'Doc Tipos de visita' = calculated
+		mode: import
+		source = DATATABLE("Tipo de visita", STRING, "Visitas", INTEGER, {{"Ambulatory Rehabilitation", 1089461}, {"ER", 598088}, {"Treatment urgency", 17858}, {"Inpatient", 592}})

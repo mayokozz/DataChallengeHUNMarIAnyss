@@ -1,0 +1,164 @@
+table 'Demanda Horaria'
+	lineageTag: bf75c3eb-b707-4131-acc1-39c6e0873e97
+
+	measure 'Factor de ajuste' = 1 + MAX('Ajuste de demanda'[Ajuste de demanda (%)]) / 100
+		formatString: 0.00
+		lineageTag: a22daa47-6214-4977-a19c-8acab945d809
+
+	measure 'Capacidad por profesional por hora' = 4 * 0.8
+		formatString: 0.0
+		lineageTag: da39d9f6-1317-4ceb-8981-aadeabef5c9d
+
+	measure 'Profesionales en turno' = SWITCH(SELECTEDVALUE('Demanda Horaria'[Turno]), "1 Mañana (6-14)", MAX('Profesionales mañana'[Profesionales turno mañana (6-14)]), "2 Tarde (14-22)", MAX('Profesionales tarde'[Profesionales turno tarde (14-22)]), MAX('Profesionales noche'[Profesionales turno noche (22-6)]))
+		formatString: 0
+		lineageTag: b28ca962-6fb2-410d-abbe-38d38bfa03b1
+
+	measure 'Demanda Hora' = SUM('Demanda Horaria'[Predicted_Demand]) * [Factor de ajuste]
+		formatString: #,0
+		lineageTag: 853056f0-3f4c-4fce-8da2-939b8484ace8
+
+	measure 'Capacidad Hora' = [Profesionales en turno] * [Capacidad por profesional por hora]
+		formatString: #,0
+		lineageTag: 79cfc664-36ec-425a-bbd7-2c29c68797bf
+
+	measure 'Demanda total (visitas)' = SUMX('Demanda Horaria', [Demanda Hora])
+		formatString: #,0
+		lineageTag: f17009d4-dda2-4dd3-86c5-a62df5347215
+
+	measure 'Capacidad total (visitas)' = SUMX('Demanda Horaria', [Capacidad Hora])
+		formatString: #,0
+		lineageTag: 40382a91-7fc9-4b82-8377-c8dd611d5ffc
+
+	measure 'Déficit total (visitas)' = SUMX('Demanda Horaria', MAX(0, [Demanda Hora] - [Capacidad Hora]))
+		formatString: #,0
+		lineageTag: ada5c495-c079-4b56-bc83-58453565ec10
+
+	measure 'Excedente total (visitas)' = SUMX('Demanda Horaria', MAX(0, [Capacidad Hora] - [Demanda Hora]))
+		formatString: #,0
+		lineageTag: 302582e6-21cf-48a7-b4ae-4152616a65ad
+
+	measure 'Horas con déficit' = SUMX('Demanda Horaria', IF([Demanda Hora] > [Capacidad Hora], 1, 0))
+		formatString: 0
+		lineageTag: d8cff7c3-f6c6-40c1-b715-c46c00d07dd2
+
+	measure 'Horas del periodo' = COUNTROWS('Demanda Horaria')
+		formatString: 0
+		lineageTag: 88537261-803d-4753-9ceb-3b40ae415066
+
+	measure 'Demanda cubierta (%)' = DIVIDE([Demanda total (visitas)] - [Déficit total (visitas)], [Demanda total (visitas)])
+		formatString: 0%
+		lineageTag: 4db21d82-a40e-4f70-bdff-4839b3c08392
+
+	measure 'Demanda pico por hora' = MAXX('Demanda Horaria', [Demanda Hora])
+		formatString: #,0
+		lineageTag: ef7153b7-fc59-4aef-a508-89371d800e9e
+
+	measure 'Profesionales necesarios en hora pico' = ROUNDUP(DIVIDE([Demanda pico por hora], [Capacidad por profesional por hora]), 0)
+		formatString: 0
+		lineageTag: 5b86c1b7-c618-4dae-a04b-726f3779766f
+
+	measure 'Profesionales en la hora pico' = MAXX(TOPN(1, 'Demanda Horaria', [Demanda Hora], DESC), [Profesionales en turno])
+		formatString: 0
+		lineageTag: e2963691-9a6c-41ef-ba2a-8b24a4974e48
+
+	measure 'Profesionales adicionales (hora pico)' = MAX(0, [Profesionales necesarios en hora pico] - [Profesionales en la hora pico])
+		formatString: 0
+		lineageTag: 48ba7787-906f-479d-8447-515d20ddce23
+
+	measure 'Profesionales necesarios según ritmo' = ROUNDUP(DIVIDE([Demanda pico por hora], SELECTEDVALUE('Sensibilidad ritmo'[Ritmo (pacientes por hora por profesional)]) * (MAX('Utilizacion pct'[Utilización objetivo (%)]) / 100)), 0)
+		formatString: 0
+		lineageTag: 5164fc54-c6bd-4f77-8207-32e6a7f3909e
+
+	measure 'Estado del plan horario' = IF([Horas con déficit] = 0, "OK: capacidad suficiente en las " & [Horas del periodo] & " horas", "ALERTA: déficit en " & [Horas con déficit] & " de " & [Horas del periodo] & " horas. En la hora pico harían falta " & [Profesionales adicionales (hora pico)] & " profesionales más")
+		lineageTag: 7a67d9f4-9f89-4b6c-823c-079a5aca8073
+
+	measure 'Demanda predicha promedio' = AVERAGE('Demanda Horaria'[Predicted_Demand])
+		formatString: 0.0
+		lineageTag: 9131d3b5-614a-4e4a-9b4f-9da1c87171bb
+
+	measure 'Demanda predicha (sin ajuste)' = SUM('Demanda Horaria'[Predicted_Demand])
+		formatString: #,0
+		lineageTag: 2f735b0a-29d9-4b0c-94ad-6dd03ae5c9a3
+
+	measure 'Profesionales adicionales por turno' = MAX(0, ROUNDUP(DIVIDE([Demanda pico por hora], [Capacidad por profesional por hora]), 0) - [Profesionales en turno])
+
+	measure 'Turno con más déficit' = VAR t = ADDCOLUMNS(VALUES('Demanda Horaria'[Turno]), "@d", CALCULATE([Déficit total (visitas)])) VAR m = MAXX(t, [@d]) RETURN IF(m <= 0, "Ninguno", MID(CONCATENATEX(TOPN(1, t, [@d], DESC), 'Demanda Horaria'[Turno]), 3, 50))
+
+	measure 'Turno con más holgura' = VAR t = ADDCOLUMNS(VALUES('Demanda Horaria'[Turno]), "@e", CALCULATE([Excedente total (visitas)])) VAR m = MAXX(t, [@e]) RETURN IF(m <= 0, "Ninguno", MID(CONCATENATEX(TOPN(1, t, [@e], DESC), 'Demanda Horaria'[Turno]), 3, 50))
+
+	measure 'Hora más crítica' = VAR t = ADDCOLUMNS(VALUES('Demanda Horaria'[Hora]), "@d", CALCULATE([Déficit total (visitas)])) VAR m = MAXX(t, [@d]) RETURN IF(m <= 0, "Ninguna", CONCATENATEX(TOPN(1, t, [@d], DESC), 'Demanda Horaria'[Hora] & ":00 h", ", "))
+
+	measure 'Refuerzo sugerido' = VAR t = ADDCOLUMNS(VALUES('Demanda Horaria'[Turno]), "@d", CALCULATE([Déficit total (visitas)]), "@x", CALCULATE([Profesionales adicionales por turno])) VAR tp = TOPN(1, t, [@d], DESC) VAR m = MAXX(tp, [@d]) RETURN IF(m <= 0, "Ninguno", "+" & MAXX(tp, [@x]) & " en " & LOWER(MID(CONCATENATEX(tp, 'Demanda Horaria'[Turno]), 3, 50)))
+
+	measure 'Personal que sobra por turno' = MAX(0, [Profesionales en turno] - ROUNDUP(DIVIDE([Demanda pico por hora], [Capacidad por profesional por hora]), 0))
+
+	measure 'Refuerzo (número)' = VAR t = ADDCOLUMNS(VALUES('Demanda Horaria'[Turno]), "@d", CALCULATE([Déficit total (visitas)]), "@x", CALCULATE([Profesionales adicionales por turno])) VAR tp = TOPN(1, t, [@d], DESC) RETURN IF(MAXX(tp, [@d]) <= 0, 0, MAXX(tp, [@x]))
+
+	measure 'Personal a mover' = VAR t = ADDCOLUMNS(VALUES('Demanda Horaria'[Turno]), "@e", CALCULATE([Excedente total (visitas)]), "@s", CALCULATE([Personal que sobra por turno])) VAR g = TOPN(1, t, [@e], DESC) RETURN IF(MAXX(g, [@e]) <= 0, 0, MIN(MAXX(g, [@s]), [Refuerzo (número)]))
+
+	measure 'Sugerencia del asistente' = VAR mv = [Personal a mover] VAR rf = [Refuerzo (número)] VAR rest = rf - mv VAR hh = [Hora más crítica] RETURN IF([Horas con déficit] = 0, "Con estos supuestos la capacidad alcanza en todas las horas.", IF(mv = 0, "Falta personal en " & [Horas con déficit] & " de " & [Horas del periodo] & " horas: suma " & [Refuerzo sugerido] & " (hora crítica: " & hh & ").", "Mueve " & mv & " profesionales de " & LOWER([Turno con más holgura]) & " a " & LOWER([Turno con más déficit]) & " (pico a las " & hh & ")" & IF(rest > 0, "; aún faltarían +" & rest & ".", ".")))
+
+	column visit_start_datetime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: ad6c1417-ef4e-46a5-90cb-0c9d32e81061
+		summarizeBy: none
+		sourceColumn: visit_start_datetime
+
+	column Predicted_Demand
+		dataType: int64
+		formatString: 0
+		lineageTag: efaeff32-cd59-4604-929c-fe683ca77d63
+		summarizeBy: sum
+		sourceColumn: Predicted_Demand
+
+	column Fecha
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 559d35a4-1951-4c11-84ca-1d0a38df620c
+		summarizeBy: none
+		sourceColumn: Fecha
+
+		variation Variation
+			isDefault
+			relationship: 9b7884a2-020c-4843-8290-7a28f0f5479e
+			defaultHierarchy: LocalDateTable_b691df30-15a4-47e2-bcb9-16d5f1d46763.'Date Hierarchy'
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Hora
+		dataType: int64
+		formatString: 0
+		lineageTag: 61d76f21-7588-47a9-8e49-035cdff3b9b3
+		summarizeBy: sum
+		sourceColumn: Hora
+
+		annotation SummarizationSetBy = Automatic
+
+	column Día
+		dataType: string
+		lineageTag: e847d6f3-fb5b-4711-8432-e597620b5d10
+		summarizeBy: none
+		sourceColumn: Día
+		sortByColumn: Fecha
+
+	column Turno
+		dataType: string
+		lineageTag: 04c1856b-4454-48b3-ac73-89c25e05cb78
+		summarizeBy: none
+		sourceColumn: Turno
+
+	partition 'Demanda Horaria' = m
+		mode: import
+		source =
+				let
+					Origen = Csv.Document(File.Contents("C:\ruta\a\hourly_demand_forecast.csv"), [Delimiter = ",", Columns = 2, Encoding = 65001, QuoteStyle = QuoteStyle.None]),
+					Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+					Tipos = Table.TransformColumnTypes(Encabezados, {{"visit_start_datetime", type datetime}, {"Predicted_Demand", Int64.Type}}, "en-US"),
+					ConFecha = Table.AddColumn(Tipos, "Fecha", each DateTime.Date([visit_start_datetime]), type date),
+					ConHora = Table.AddColumn(ConFecha, "Hora", each Time.Hour(DateTime.Time([visit_start_datetime])), Int64.Type),
+					ConDia = Table.AddColumn(ConHora, "Día", each Date.ToText([Fecha], [Format = "dd ddd", Culture = "es-CO"]), type text),
+					ConTurno = Table.AddColumn(ConDia, "Turno", each if [Hora] >= 6 and [Hora] < 14 then "1 Mañana (6-14)" else if [Hora] >= 14 and [Hora] < 22 then "2 Tarde (14-22)" else "3 Noche (22-6)", type text)
+				in
+					ConTurno
+

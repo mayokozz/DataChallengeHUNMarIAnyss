@@ -1,0 +1,33 @@
+table 'Doc Evaluacion semanal'
+	column 'Semana'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [Semana]
+
+	column 'MAE Random Forest'
+		dataType: double
+		formatString: 0.0
+		summarizeBy: sum
+		sourceColumn: [MAE Random Forest]
+
+	column 'MAE línea base'
+		dataType: double
+		formatString: 0.0
+		summarizeBy: sum
+		sourceColumn: [MAE línea base]
+
+	column 'RMSE Random Forest'
+		dataType: double
+		formatString: 0.0
+		summarizeBy: sum
+		sourceColumn: [RMSE Random Forest]
+
+	column 'R2 Random Forest'
+		dataType: double
+		formatString: 0.000
+		summarizeBy: sum
+		sourceColumn: [R2 Random Forest]
+
+	partition 'Doc Evaluacion semanal' = calculated
+		mode: import
+		source = DATATABLE("Semana", STRING, "MAE Random Forest", DOUBLE, "MAE línea base", DOUBLE, "RMSE Random Forest", DOUBLE, "R2 Random Forest", DOUBLE, {{"Semana 1", 12.676, 18.31, 22.111, 0.861}, {"Semana 2", 15.659, 18.155, 33.181, 0.597}, {"Semana 3", 10.339, 17.417, 17.126, 0.921}, {"Semana 4", 15.601, 18.488, 34.416, 0.65}})
