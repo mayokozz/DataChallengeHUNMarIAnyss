@@ -1,0 +1,15 @@
+table 'Doc Tablas OMOP'
+	column 'Tabla'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [Tabla]
+
+	column 'Filas'
+		dataType: int64
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: [Filas]
+
+	partition 'Doc Tablas OMOP' = calculated
+		mode: import
+		source = DATATABLE("Tabla", STRING, "Filas", INTEGER, {{"person", 912205}, {"visit_occurrence", 1706001}, {"visit_detail", 3281613}, {"condition_occurrence", 38636063}, {"procedure_occurrence", 47042032}, {"measurement", 16575888}, {"concept", 10004331}})

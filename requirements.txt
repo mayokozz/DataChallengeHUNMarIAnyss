@@ -5,3 +5,5 @@ python-dotenv
 scikit-learn
 matplotlib
 jupyter
+
+scipy>=1.9

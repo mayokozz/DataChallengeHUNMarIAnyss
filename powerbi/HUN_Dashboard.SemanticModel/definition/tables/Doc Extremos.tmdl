@@ -1,0 +1,26 @@
+table 'Doc Extremos'
+	column 'N°'
+		dataType: int64
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: [N°]
+
+	column 'Dimensión'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [Dimensión]
+
+	column 'Categoría'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [Categoría]
+
+	column 'Visitas'
+		dataType: int64
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: [Visitas]
+
+	partition 'Doc Extremos' = calculated
+		mode: import
+		source = DATATABLE("N°", INTEGER, "Dimensión", STRING, "Categoría", STRING, "Visitas", INTEGER, {{1, "Día", "Miércoles (máx.)", 317667}, {2, "Día", "Domingo (mín.)", 69490}, {3, "Hora", "9 h", 203266}, {4, "Hora", "8 h", 187996}, {5, "Hora", "10 h", 176637}, {6, "Hora", "4 h (mín.)", 5407}, {7, "Hora", "3 h", 5588}, {8, "Hora", "2 h", 6311}, {9, "Mes", "Abril", 170102}, {10, "Mes", "Mayo", 169231}, {11, "Mes", "Marzo", 159185}, {12, "Mes", "Diciembre (mín.)", 106179}})

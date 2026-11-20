@@ -1,0 +1,25 @@
+table 'Doc Metricas'
+	column 'Métrica'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [Métrica]
+		sortByColumn: 'Orden'
+
+	column 'Random Forest'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [Random Forest]
+
+	column 'Línea base estacional'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [Línea base estacional]
+
+	column 'Orden'
+		dataType: int64
+		summarizeBy: sum
+		sourceColumn: [Orden]
+
+	partition 'Doc Metricas' = calculated
+		mode: import
+		source = DATATABLE("Métrica", STRING, "Random Forest", STRING, "Línea base estacional", STRING, "Orden", INTEGER, {{"MAE (visitas/hora)", "13,57", "18,09", 1}, {"RMSE (visitas/hora)", "27,69", "36,68", 2}, {"R²", "0,771", "0,598", 3}})
